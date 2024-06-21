@@ -1,9 +1,27 @@
-import { registrationUser, activateUser } from "../controllers/user.controller";
+import {
+  registrationUser,
+  activateUser,
+  loginUser,
+  logoutUser,
+  updateAccessToken,
+  getUserInfo,
+  socialAuth,
+  updateUserInfo,
+} from "../controllers/user.controller";
 import express from "express";
+import { isAuthenticated } from "../middleware/auth";
 
 const router = express.Router();
 
+router.get("/logout", isAuthenticated, logoutUser);
+router.get("/refresh-token", updateAccessToken);
+router.get("/me", isAuthenticated, getUserInfo);
+
 router.post("/register", registrationUser);
 router.post("/activate-user", activateUser);
+router.post("/login", loginUser);
+router.post("/social-auth", socialAuth);
+
+router.put("/update-user-info", isAuthenticated, updateUserInfo);
 
 export default router;

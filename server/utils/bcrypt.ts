@@ -63,7 +63,7 @@ export const signRefreshToken = (id: string) => {
     },
     env.REFRESH_TOKEN,
     {
-      expiresIn: "5m",
+      expiresIn: "3d",
     }
   );
 };

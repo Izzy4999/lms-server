@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import { ErrorMiddleWare } from "./middleware/error";
@@ -25,4 +25,9 @@ app.get("/", (req: Request, res: Response) => {
   });
 });
 
+app.all("*", (req: Request, res: Response, next: NextFunction) => {
+  const err = new Error(`Route: ${req.method} ${req.originalUrl} not found`) as any;
+  err.statusCode = 404;
+  next(err);
+});
 app.use(ErrorMiddleWare);

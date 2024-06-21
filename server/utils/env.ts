@@ -1,5 +1,5 @@
 import { config } from "dotenv";
-import { cleanEnv, makeValidator, port, str } from "envalid";
+import { cleanEnv, makeValidator, num, port, str } from "envalid";
 
 config();
 const env = cleanEnv(process.env, {
@@ -15,7 +15,9 @@ const env = cleanEnv(process.env, {
   SMTP_PASSWORD: str(),
   SMTP_SERVICE: str(),
   ACCESS_TOKEN: str(),
+  ACCESS_TOKEN_EXPIRE: str(),
   REFRESH_TOKEN: str(),
+  REFRESH_TOKEN_EXPIRE: str(),
 });
 
 export default env;
