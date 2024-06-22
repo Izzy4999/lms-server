@@ -2,7 +2,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import ErrorHandlers from "../utils/ErrorHandler";
 import { CatchAsyncError } from "../middleware/catchAsyncError";
-import Joi, { any } from "joi";
+import Joi from "joi";
 import {
   comparePassword,
   createActivationToken,
@@ -21,6 +21,7 @@ import {
 } from "../utils/jwt";
 import { redis } from "../libs/redis";
 import { getUserById } from "../services/user.service";
+import cloudinary from "cloudinary";
 
 // schemas
 
@@ -47,6 +48,18 @@ const socialAuthSchema = Joi.object({
     public_id: Joi.string().required(),
     url: Joi.string().required(),
   }).optional(),
+});
+
+const updatePasswordSchema = Joi.object({
+  oldPassword: Joi.string().min(6).required(),
+  newPassword: Joi.string().min(6).required(),
+});
+
+const updateProfilePictureSchema = Joi.object({
+  avatar: Joi.object({
+    public_id: Joi.string().required(),
+    url: Joi.string().required(),
+  }).required(),
 });
 
 // controllers
@@ -106,10 +119,10 @@ export const registrationUser = CatchAsyncError(
   }
 );
 
-interface IActivationToken {
-  activation_token: string;
-  activation_code: string;
-}
+// interface IActivationToken {
+//   activation_token: string;
+//   activation_code: string;
+// }
 
 export const activateUser = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -357,6 +370,123 @@ export const updateUserInfo = CatchAsyncError(
       await redis.set(userId as string, JSON.stringify(updatedUser));
 
       return res.status(200).json({
+        success: true,
+        user: updatedUser,
+      });
+    } catch (error: any) {
+      return next(new ErrorHandlers(error.message, 400));
+    }
+  }
+);
+
+// interface IUpdatePassword {
+//   oldPassword: string;
+//   newPassword: string;
+// }
+
+export const updatePassword = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      validateBody(updatePasswordSchema, req.body, res);
+      const { oldPassword, newPassword } = req.body;
+
+      const user = req.user;
+
+      if (user?.password === null || user?.password === undefined) {
+        return next(new ErrorHandlers("invalid user", 400));
+      }
+
+      const isPasswordMatched = await comparePassword(
+        oldPassword,
+        user?.password
+      );
+
+      if (!isPasswordMatched) {
+        return next(new ErrorHandlers("invalid password", 400));
+      }
+
+      const hashedPassword = await hashPassword(newPassword);
+
+      const newUser = await prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          password: hashedPassword,
+        },
+      });
+
+      redis.set(user.id, JSON.stringify(newUser));
+
+      return res.status(201).json({
+        success: true,
+        user: newUser,
+      });
+    } catch (error: any) {
+      return next(new ErrorHandlers(error.message, 400));
+    }
+  }
+);
+
+export const updateProfilePicture = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      validateBody(updateProfilePictureSchema, req.body, res);
+
+      let updatedUser;
+
+      const { avatar } = req.body;
+
+      const user = req.user;
+
+      const userExist = await prisma.user.findFirst({
+        where: {
+          id: user?.id,
+        },
+      });
+
+      if (avatar && userExist) {
+        if (user?.avatar?.public_id) {
+          await cloudinary.v2.uploader.destroy(user?.avatar?.public_id);
+          const mycloud = await cloudinary.v2.uploader.upload(avatar, {
+            folder: "avatar",
+            width: 150,
+          });
+
+          updatedUser = await prisma.user.update({
+            where: {
+              id: userExist.id,
+            },
+            data: {
+              avatar: {
+                public_id: mycloud.public_id,
+                url: mycloud.secure_url,
+              },
+            },
+          });
+        } else {
+          const mycloud = await cloudinary.v2.uploader.upload(avatar, {
+            folder: "avatar",
+            width: 150,
+          });
+
+          updatedUser = await prisma.user.update({
+            where: {
+              id: userExist.id,
+            },
+            data: {
+              avatar: {
+                public_id: mycloud.public_id,
+                url: mycloud.secure_url,
+              },
+            },
+          });
+        }
+      }
+
+      await redis.set(userExist?.id as string, JSON.stringify(updatedUser));
+
+      return res.status(201).json({
         success: true,
         user: updatedUser,
       });

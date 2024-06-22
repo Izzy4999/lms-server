@@ -26,7 +26,96 @@ model User {
   updatedAt  DateTime @updatedAt
 }
 
+type CoursesData {
+  videoUrl       String
+  videoThumbnail Json
+  title          String
+  description    String
+  videoSection   String
+  videoLength    Float
+  videoPlayer    String
+  suggestion     String
+  link           Link[]
+  questions      Comment[]
+
+}
+
+type Review {
+  user      Json
+  rating    Float    @default(0)
+  comment   String
+}
+
+type Link {
+  title         String
+  url           String
+}
+
+type Comment {
+  user           Json
+  comment        String
+  commentReplies Json
+}
+
+model Courses {
+  id             String        @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  description    String
+  price          Float
+  estimatedPrice Float?
+  thumbnail      Thumbnail
+  tags           String
+  levels         String
+  demoUrl        String
+  benefits       Benefit[]
+  prerequisites  Benefit[]
+  reviews        Review[]
+  courseData     CoursesData[]
+  ratings        Float         @default(0)
+  purchased      Int           @default(0)
+}
+
+type Benefit {
+  title String
+}
+
+// type CourseData {
+//   title          String
+//   description    String
+//   videoUrl       String
+//   videoThumbnail String
+//   videoSections  String
+//   videoLength    Float
+//   videoPlayer    String
+//   links          Link[]
+//   suggestion     String
+//   questions      Comment[]
+// }
+
+// type Comment {
+//   comment        String
+//   user           Json
+//   commentReplies Comment[]
+// }
+
+// type ReviewType {
+//   user           Json
+//   rating         Float
+//   comment        String
+//   commentReplies Comment
+// }
+
+// type LinkSchema {
+//   title String
+//   url   String
+// }
+
 type Avatar {
+  public_id String
+  url       String
+}
+
+type Thumbnail {
   public_id String
   url       String
 }

@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import { ErrorMiddleWare } from "./middleware/error";
 import userRouter from "./routes/user.routes";
+import courseRouter from "./routes/course.route";
 
 export const app = express();
 
@@ -18,6 +19,7 @@ app.use(
 );
 
 app.use("/api/v1/user", userRouter);
+app.use("/api/v1/course", courseRouter);
 
 app.get("/", (req: Request, res: Response) => {
   return res.status(200).json({
@@ -26,7 +28,9 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.all("*", (req: Request, res: Response, next: NextFunction) => {
-  const err = new Error(`Route: ${req.method} ${req.originalUrl} not found`) as any;
+  const err = new Error(
+    `Route: ${req.method} ${req.originalUrl} not found`
+  ) as any;
   err.statusCode = 404;
   next(err);
 });
