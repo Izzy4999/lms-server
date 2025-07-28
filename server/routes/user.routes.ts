@@ -9,15 +9,22 @@ import {
   updateUserInfo,
   updatePassword,
   updateProfilePicture,
+  getAllUsers,
 } from "../controllers/user.controller";
 import express from "express";
-import { isAuthenticated } from "../middleware/auth";
+import { authorizedRoles, isAuthenticated } from "../middleware/auth";
 
 const router = express.Router();
 
 router.get("/logout", isAuthenticated, logoutUser);
 router.get("/refresh-token", updateAccessToken);
 router.get("/me", isAuthenticated, getUserInfo);
+router.get(
+  "/mget-userse",
+  isAuthenticated,
+  authorizedRoles("admin"),
+  getAllUsers
+);
 
 router.post("/register", registrationUser);
 router.post("/activate-user", activateUser);

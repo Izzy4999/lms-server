@@ -27,6 +27,7 @@ model User {
 }
 
 type CoursesData {
+  id             String
   videoUrl       String
   videoThumbnail Json
   title          String
@@ -36,25 +37,8 @@ type CoursesData {
   videoPlayer    String
   suggestion     String
   link           Link[]
-  questions      Comment[]
-
-}
-
-type Review {
-  user      Json
-  rating    Float    @default(0)
-  comment   String
-}
-
-type Link {
-  title         String
-  url           String
-}
-
-type Comment {
-  user           Json
-  comment        String
-  commentReplies Json
+  questions      Questions[]
+  createdAt      DateTime    @default(now())
 }
 
 model Courses {
@@ -73,42 +57,91 @@ model Courses {
   courseData     CoursesData[]
   ratings        Float         @default(0)
   purchased      Int           @default(0)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model Order {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  courseId     String
+  userId       String
+  payment_info Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  message   String
+  status    String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Layout {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  type        String
+  faq         FaqItem[]
+  categories  Category[]
+  banner      Banner
+}
+
+model Banner {
+  image       BannerImage
+  title       String
+  description String
+}
+
+model FaqItem {
+  question  String
+  answer    String
+  createdAt DateTime @default(now())
+}
+
+model Category {
+  title String
+}
+
+model BannerImage {
+  public_id String
+  url       String
+}
+
+type Review {
+  id             String
+  user           Json
+  rating         Float    @default(0)
+  comment        String
+  commentReplies Json[]
+  createdAt      DateTime @default(now())
+}
+
+type Link {
+  title String
+  url   String
+}
+
+type Comment {
+  id             String
+  user           Json
+  comment        String
+  commentReplies Json[]
+  createdAt      DateTime @default(now())
+}
+
+type Questions {
+  id              String
+  user            Json
+  question        String
+  questionReplies Json[]
+  createdAt       DateTime @default(now())
 }
 
 type Benefit {
   title String
 }
-
-// type CourseData {
-//   title          String
-//   description    String
-//   videoUrl       String
-//   videoThumbnail String
-//   videoSections  String
-//   videoLength    Float
-//   videoPlayer    String
-//   links          Link[]
-//   suggestion     String
-//   questions      Comment[]
-// }
-
-// type Comment {
-//   comment        String
-//   user           Json
-//   commentReplies Comment[]
-// }
-
-// type ReviewType {
-//   user           Json
-//   rating         Float
-//   comment        String
-//   commentReplies Comment
-// }
-
-// type LinkSchema {
-//   title String
-//   url   String
-// }
 
 type Avatar {
   public_id String

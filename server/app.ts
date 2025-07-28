@@ -4,6 +4,9 @@ import cors from "cors";
 import { ErrorMiddleWare } from "./middleware/error";
 import userRouter from "./routes/user.routes";
 import courseRouter from "./routes/course.route";
+import orderRoute from "./routes/order.route";
+import notificationRoute from "./routes/notification.route";
+import analyticsRoute from "./routes/analytics.route";
 
 export const app = express();
 
@@ -20,6 +23,9 @@ app.use(
 
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/course", courseRouter);
+app.use("/api/v1/order", orderRoute);
+app.use("/api/v1/notification", notificationRoute);
+app.use("/api/v1/analytics", analyticsRoute);
 
 app.get("/", (req: Request, res: Response) => {
   return res.status(200).json({

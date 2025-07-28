@@ -7,3 +7,13 @@ export const getUserById = async (id: string) => {
     return JSON.parse(user);
   }
 };
+
+// Get all users
+export const getAllUsersService = async () =>{
+  const users = await prisma.user.findMany({
+    orderBy:{
+      createdAt: "desc"
+    }
+  });
+  return users;
+}

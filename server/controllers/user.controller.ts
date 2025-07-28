@@ -20,7 +20,7 @@ import {
   sendToken,
 } from "../utils/jwt";
 import { redis } from "../libs/redis";
-import { getUserById } from "../services/user.service";
+import { getAllUsersService, getUserById } from "../services/user.service";
 import cloudinary from "cloudinary";
 
 // schemas
@@ -273,7 +273,9 @@ export const getUserInfo = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const id = req.user?.id;
-      const user = getUserById(id as string);
+
+      const user = await getUserById(id as string);
+
       return res.status(200).json({
         success: true,
         user,
@@ -492,6 +494,20 @@ export const updateProfilePicture = CatchAsyncError(
       });
     } catch (error: any) {
       return next(new ErrorHandlers(error.message, 400));
+    }
+  }
+);
+
+export const getAllUsers = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const users = await getAllUsersService();
+      return res.status(200).json({
+        success: true,
+        users,
+      });
+    } catch (error: any) {
+      return next(new ErrorHandlers(error.message, 500));
     }
   }
 );

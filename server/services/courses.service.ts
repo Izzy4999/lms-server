@@ -10,3 +10,12 @@ export const createCourse = async (data: any) => {
 
   return course;
 };
+
+export const getAllCoursesService = async () => {
+  const courses = await prisma.courses.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+  return courses;
+};
